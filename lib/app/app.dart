@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../presentation/screens/home/home_screen.dart';
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -7,16 +9,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'EMA Shop',
-      theme: ThemeData(useMaterial3: true, brightness: Brightness.dark),
-      home: const Scaffold(
-        body: Center(
-          child: Text(
-            'EMA Shop',
-            style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-          ),
-        ),
+      title: 'ADKM Shop',
+
+      theme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        colorSchemeSeed: Colors.blue,
       ),
+
+      home: const HomeScreen(),
     );
   }
 }
