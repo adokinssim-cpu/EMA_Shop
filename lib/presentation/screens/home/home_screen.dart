@@ -26,13 +26,16 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             onPressed: () {},
             icon: const Icon(Icons.notifications_none),
+            tooltip: 'Notifications',
           ),
         ],
       ),
 
       body: Column(
         children: [
+          // ═══════════════════════════════
           // RECHERCHE
+          // ═══════════════════════════════
           Padding(
             padding: const EdgeInsets.all(16),
             child: TextField(
@@ -57,7 +60,9 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
 
-          // FILTRES
+          // ═══════════════════════════════
+          // CATÉGORIES
+          // ═══════════════════════════════
           SizedBox(
             height: 50,
             child: ListView(
@@ -111,7 +116,9 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
 
+          // ═══════════════════════════════
           // TRI
+          // ═══════════════════════════════
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 10, 16, 5),
             child: Row(
@@ -161,11 +168,15 @@ class HomeScreen extends ConsumerWidget {
             ),
           ),
 
-          // LISTE DES PRODUITS
+          // ═══════════════════════════════
+          // PRODUITS
+          // ═══════════════════════════════
           Expanded(
             child: productsAsync.when(
+              // Chargement
               loading: () => const LoadingWidget(),
 
+              // Erreur
               error: (error, stackTrace) {
                 return Center(
                   child: Padding(
@@ -197,6 +208,7 @@ class HomeScreen extends ConsumerWidget {
                 );
               },
 
+              // Données
               data: (products) {
                 if (products.isEmpty) {
                   return const Center(child: Text('Aucun produit trouvé.'));
@@ -222,7 +234,9 @@ class HomeScreen extends ConsumerWidget {
 
                     return ProductCard(
                       product: product,
-                      isFavorite: isFavorite, // <--- Paramètre ajouté ici
+                      isFavorite: isFavorite,
+
+                      // Ouvre le détail du produit
                       onTap: () {
                         Navigator.push(
                           context,
@@ -232,6 +246,8 @@ class HomeScreen extends ConsumerWidget {
                           ),
                         );
                       },
+
+                      // Ajoute / retire des favoris
                       onFavorite: () {
                         ref
                             .read(favoritesProvider.notifier)
@@ -248,6 +264,10 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 }
+
+// ═══════════════════════════════════════
+// WIDGET : CATÉGORIE
+// ═══════════════════════════════════════
 
 class _CategoryChip extends StatelessWidget {
   final String label;
@@ -267,7 +287,9 @@ class _CategoryChip extends StatelessWidget {
       child: FilterChip(
         label: Text(label),
         selected: selected,
-        onSelected: (_) => onSelected(),
+        onSelected: (_) {
+          onSelected();
+        },
       ),
     );
   }

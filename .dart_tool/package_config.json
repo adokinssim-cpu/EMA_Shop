@@ -171,15 +171,15 @@
     },
     {
       "name": "shared_preferences_android",
-      "rootUri": "file:///C:/Users/Pro%20x2%20612/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.4.27",
+      "rootUri": "file:///C:/Users/Pro%20x2%20612/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_android-2.4.28",
       "packageUri": "lib/",
       "languageVersion": "3.12"
     },
     {
       "name": "shared_preferences_foundation",
-      "rootUri": "file:///C:/Users/Pro%20x2%20612/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_foundation-2.5.6",
+      "rootUri": "file:///C:/Users/Pro%20x2%20612/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences_foundation-2.5.7",
       "packageUri": "lib/",
-      "languageVersion": "3.9"
+      "languageVersion": "3.10"
     },
     {
       "name": "shared_preferences_linux",

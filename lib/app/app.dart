@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../presentation/screens/home/home_screen.dart';
+import '../presentation/screens/main_navigation_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -9,7 +9,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'ADKM Shop',
+      title: 'EMA Shop',
 
       theme: ThemeData(
         useMaterial3: true,
@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
         colorSchemeSeed: Colors.blue,
       ),
 
-      home: const HomeScreen(),
+      home: const MainNavigationScreen(),
     );
   }
 }
