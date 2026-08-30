@@ -11,19 +11,10 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
 
     if (index == -1) {
       state = [...state, CartItem(product: product, quantity: 1)];
-    } else {
-      final updatedCart = [...state];
-
-      final item = updatedCart[index];
-
-      updatedCart[index] = item.copyWith(quantity: item.quantity + 1);
-
-      state = updatedCart;
+      return;
     }
-  }
 
-  void removeProduct(Product product) {
-    state = state.where((item) => item.product.id != product.id).toList();
+    increaseQuantity(product);
   }
 
   void increaseQuantity(Product product) {
@@ -32,7 +23,6 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     if (index == -1) return;
 
     final updatedCart = [...state];
-
     final item = updatedCart[index];
 
     updatedCart[index] = item.copyWith(quantity: item.quantity + 1);
@@ -59,19 +49,23 @@ class CartNotifier extends StateNotifier<List<CartItem>> {
     state = updatedCart;
   }
 
+  void removeProduct(Product product) {
+    state = state.where((item) => item.product.id != product.id).toList();
+  }
+
   void clearCart() {
     state = [];
   }
 }
 
-final cartProvider = StateNotifierProvider<CartNotifier, List<CartItem>>((ref) {
-  return CartNotifier();
-});
+final cartProvider = StateNotifierProvider<CartNotifier, List<CartItem>>(
+  (ref) => CartNotifier(),
+);
 
 final cartTotalProvider = Provider<double>((ref) {
   final cart = ref.watch(cartProvider);
 
-  return cart.fold(0, (total, item) => total + item.totalPrice);
+  return cart.fold(0.0, (total, item) => total + item.totalPrice);
 });
 
 final cartItemCountProvider = Provider<int>((ref) {

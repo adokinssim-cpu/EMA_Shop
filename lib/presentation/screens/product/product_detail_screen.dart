@@ -29,7 +29,9 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   }
 
   void decreaseQuantity() {
-    if (quantity <= 1) return;
+    if (quantity <= 1) {
+      return;
+    }
 
     setState(() {
       quantity--;
@@ -39,31 +41,34 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   void addToCart() {
     final cartNotifier = ref.read(cartProvider.notifier);
 
-    // Ajoute une première unité.
     cartNotifier.addProduct(widget.product);
 
-    // Ajoute les unités supplémentaires.
     for (int i = 1; i < quantity; i++) {
       cartNotifier.increaseQuantity(widget.product);
     }
 
+    if (!mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('$quantity × ${widget.product.name} ajouté au panier'),
-        action: SnackBarAction(
-          label: 'VOIR',
-          onPressed: () {
-            // Le panier pourra être ouvert depuis la navigation principale.
-          },
-        ),
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(label: 'OK', onPressed: () {}),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final favorites = ref.watch(favoritesProvider);
-    final isFavorite = favorites.contains(widget.product.id);
+    final isFavorite = ref.watch(
+      favoritesProvider.select(
+        (favorites) => favorites.contains(widget.product.id),
+      ),
+    );
 
     final totalPrice = widget.product.price * quantity;
 
@@ -75,6 +80,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         ),
         actions: [
           IconButton(
+            tooltip: isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris',
             onPressed: () {
               ref
                   .read(favoritesProvider.notifier)
@@ -87,20 +93,24 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
           ),
         ],
       ),
-
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ═══════════════════════════════
             // IMAGE DU PRODUIT
-            // ═══════════════════════════════
             SizedBox(
               width: double.infinity,
-              height: 300,
+              height: 320,
               child: Image.network(
                 widget.product.imageUrl,
                 fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  }
+
+                  return const Center(child: CircularProgressIndicator());
+                },
                 errorBuilder: (context, error, stackTrace) {
                   return const Center(
                     child: Icon(Icons.image_not_supported_outlined, size: 80),
@@ -109,40 +119,43 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               ),
             ),
 
-            // ═══════════════════════════════
             // INFORMATIONS DU PRODUIT
-            // ═══════════════════════════════
             Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Catégorie
+                  // CATÉGORIE
                   Text(
-                    widget.product.category,
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+                    widget.product.category.toUpperCase(),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.8,
+                    ),
                   ),
 
                   const SizedBox(height: 8),
 
-                  // Nom
+                  // NOM
                   Text(
                     widget.product.name,
                     style: const TextStyle(
-                      fontSize: 25,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 14),
 
-                  // Note
+                  // NOTE
                   Row(
                     children: [
                       const Icon(Icons.star, color: Colors.amber, size: 22),
                       const SizedBox(width: 6),
                       Text(
-                        widget.product.rating.toString(),
+                        widget.product.rating.toStringAsFixed(1),
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -151,121 +164,129 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     ],
                   ),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
 
-                  // Prix
+                  // PRIX
                   Text(
                     formatPrice(widget.product.price),
-                    style: const TextStyle(
-                      fontSize: 24,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.primary,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 28),
 
-                  // ═══════════════════════════════
                   // DESCRIPTION
-                  // ═══════════════════════════════
                   const Text(
                     'Description',
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
 
                   Text(
                     widget.product.description,
                     style: TextStyle(
                       color: Colors.grey.shade700,
-                      fontSize: 15,
-                      height: 1.5,
+                      fontSize: 16,
+                      height: 1.6,
                     ),
                   ),
 
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 30),
 
-                  // ═══════════════════════════════
                   // QUANTITÉ
-                  // ═══════════════════════════════
                   const Text(
                     'Quantité',
-                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
 
                   const SizedBox(height: 12),
 
-                  Row(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(10),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: 'Diminuer',
+                          onPressed: quantity > 1 ? decreaseQuantity : null,
+                          icon: const Icon(Icons.remove),
                         ),
-                        child: Row(
-                          children: [
-                            IconButton(
-                              onPressed: decreaseQuantity,
-                              icon: const Icon(Icons.remove),
-                            ),
 
-                            Text(
-                              quantity.toString(),
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
+                        Container(
+                          constraints: const BoxConstraints(minWidth: 45),
+                          alignment: Alignment.center,
+                          child: Text(
+                            quantity.toString(),
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
-
-                            IconButton(
-                              onPressed: increaseQuantity,
-                              icon: const Icon(Icons.add),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ],
+
+                        IconButton(
+                          tooltip: 'Augmenter',
+                          onPressed: increaseQuantity,
+                          icon: const Icon(Icons.add),
+                        ),
+                      ],
+                    ),
                   ),
 
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 30),
 
-                  // ═══════════════════════════════
                   // TOTAL
-                  // ═══════════════════════════════
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Total',
-                        style: TextStyle(
-                          fontSize: 19,
-                          fontWeight: FontWeight.bold,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 18,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total',
+                          style: TextStyle(
+                            fontSize: 19,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        formatPrice(totalPrice),
-                        style: const TextStyle(
-                          fontSize: 21,
-                          fontWeight: FontWeight.bold,
+                        Text(
+                          formatPrice(totalPrice),
+                          style: const TextStyle(
+                            fontSize: 21,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
-                  // ═══════════════════════════════
-                  // BOUTON PANIER
-                  // ═══════════════════════════════
+                  // AJOUT AU PANIER
                   SizedBox(
                     width: double.infinity,
-                    height: 55,
+                    height: 56,
                     child: ElevatedButton.icon(
                       onPressed: addToCart,
                       icon: const Icon(Icons.shopping_cart_outlined),
-                      label: const Text(
-                        'Ajouter au panier',
-                        style: TextStyle(
+                      label: Text(
+                        'Ajouter $quantity au panier',
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -273,7 +294,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                 ],
               ),
             ),

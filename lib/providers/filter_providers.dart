@@ -12,110 +12,69 @@ class FilterNotifier extends StateNotifier<ProductFilter> {
   }
 
   void setCategory(String? category) {
-    if (category == null) {
-      state = state.copyWith(clearCategory: true);
-      return;
-    }
-
-    state = state.copyWith(category: category);
-  }
-
-  void setMinPrice(double? price) {
-    state = ProductFilter(
-      searchQuery: state.searchQuery,
-      category: state.category,
-      minPrice: price,
-      maxPrice: state.maxPrice,
-      sortOption: state.sortOption,
-    );
-  }
-
-  void setMaxPrice(double? price) {
-    state = ProductFilter(
-      searchQuery: state.searchQuery,
-      category: state.category,
-      minPrice: state.minPrice,
-      maxPrice: price,
-      sortOption: state.sortOption,
-    );
+    state = state.copyWith(category: category, clearCategory: category == null);
   }
 
   void setSortOption(SortOption option) {
     state = state.copyWith(sortOption: option);
   }
 
-  void clearFilters() {
+  void resetFilters() {
     state = const ProductFilter();
   }
 }
 
-final filterProvider = StateNotifierProvider<FilterNotifier, ProductFilter>((
-  ref,
-) {
-  return FilterNotifier();
-});
+final filterProvider = StateNotifierProvider<FilterNotifier, ProductFilter>(
+  (ref) => FilterNotifier(),
+);
 
-final filteredProductsProvider = Provider<AsyncValue<List<Product>>>((ref) {
-  final productsAsync = ref.watch(productsProvider);
+final filteredProductsProvider = FutureProvider<List<Product>>((ref) async {
+  final products = await ref.watch(productsProvider.future);
   final filter = ref.watch(filterProvider);
 
-  return productsAsync.whenData((products) {
-    var filtered = [...products];
+  var filteredProducts = List<Product>.from(products);
 
-    // Recherche
-    if (filter.searchQuery.isNotEmpty) {
-      final query = filter.searchQuery.toLowerCase();
+  // Recherche
+  final query = filter.searchQuery.trim().toLowerCase();
 
-      filtered = filtered.where((product) {
-        return product.name.toLowerCase().contains(query) ||
-            product.description.toLowerCase().contains(query) ||
-            product.category.toLowerCase().contains(query);
-      }).toList();
-    }
+  if (query.isNotEmpty) {
+    filteredProducts = filteredProducts.where((product) {
+      return product.name.toLowerCase().contains(query) ||
+          product.description.toLowerCase().contains(query) ||
+          product.category.toLowerCase().contains(query);
+    }).toList();
+  }
 
-    // Catégorie
-    if (filter.category != null) {
-      filtered = filtered
-          .where((product) => product.category == filter.category)
-          .toList();
-    }
+  // Catégorie
+  if (filter.category != null) {
+    filteredProducts = filteredProducts
+        .where((product) => product.category == filter.category)
+        .toList();
+  }
 
-    // Prix minimum
-    if (filter.minPrice != null) {
-      filtered = filtered
-          .where((product) => product.price >= filter.minPrice!)
-          .toList();
-    }
+  // Tri
+  switch (filter.sortOption) {
+    case SortOption.priceLowToHigh:
+      filteredProducts.sort((a, b) => a.price.compareTo(b.price));
+      break;
 
-    // Prix maximum
-    if (filter.maxPrice != null) {
-      filtered = filtered
-          .where((product) => product.price <= filter.maxPrice!)
-          .toList();
-    }
+    case SortOption.priceHighToLow:
+      filteredProducts.sort((a, b) => b.price.compareTo(a.price));
+      break;
 
-    // Tri
-    switch (filter.sortOption) {
-      case SortOption.priceLowToHigh:
-        filtered.sort((a, b) => a.price.compareTo(b.price));
-        break;
+    case SortOption.ratingHighToLow:
+      filteredProducts.sort((a, b) => b.rating.compareTo(a.rating));
+      break;
 
-      case SortOption.priceHighToLow:
-        filtered.sort((a, b) => b.price.compareTo(a.price));
-        break;
+    case SortOption.nameAZ:
+      filteredProducts.sort(
+        (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+      );
+      break;
 
-      case SortOption.ratingHighToLow:
-        filtered.sort((a, b) => b.rating.compareTo(a.rating));
-        break;
+    case SortOption.none:
+      break;
+  }
 
-      case SortOption.nameAZ:
-        filtered.sort((a, b) => a.name.compareTo(b.name));
-        break;
-
-      case SortOption.none:
-        break;
-    }
-
-    return filtered;
-  });
+  return filteredProducts;
 });

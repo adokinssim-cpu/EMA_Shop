@@ -17,7 +17,7 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
   Future<void> _loadFavorites() async {
     final favorites = await repository.getFavorites();
 
-    state = favorites;
+    state = {...favorites};
   }
 
   Future<void> toggleFavorite(String productId) async {
@@ -39,8 +39,9 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
   }
 
   Future<void> removeFavorite(String productId) async {
-    final updatedFavorites = {...state};
+    if (!state.contains(productId)) return;
 
+    final updatedFavorites = {...state};
     updatedFavorites.remove(productId);
 
     state = updatedFavorites;
@@ -49,6 +50,8 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
   }
 
   Future<void> clearFavorites() async {
+    if (state.isEmpty) return;
+
     state = {};
 
     await repository.saveFavorites(state);

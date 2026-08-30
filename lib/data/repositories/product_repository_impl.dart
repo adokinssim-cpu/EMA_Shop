@@ -1,15 +1,30 @@
 import '../../domain/models/product.dart';
 import '../../domain/repositories/product_repository.dart';
-import '../datasources/product_local_datasource.dart';
+import '../datasources/product_mock_datasource.dart';
 
 class ProductRepositoryImpl implements ProductRepository {
-  final ProductLocalDataSource dataSource;
+  @override
+  Future<List<Product>> getProducts() async {
+    // Simulation d'un appel réseau.
+    await Future.delayed(const Duration(milliseconds: 700));
 
-  ProductRepositoryImpl({ProductLocalDataSource? dataSource})
-    : dataSource = dataSource ?? ProductLocalDataSource();
+    return mockProducts.map((json) => Product.fromJson(json)).toList();
+  }
 
   @override
-  Future<List<Product>> getProducts() {
-    return dataSource.getProducts();
+  Future<Product?> getProductById(String id) async {
+    // Simulation d'un appel réseau.
+    await Future.delayed(const Duration(milliseconds: 300));
+
+    final productJson = mockProducts.cast<Map<String, dynamic>>().firstWhere(
+      (product) => product['id'] == id,
+      orElse: () => {},
+    );
+
+    if (productJson.isEmpty) {
+      return null;
+    }
+
+    return Product.fromJson(productJson);
   }
 }

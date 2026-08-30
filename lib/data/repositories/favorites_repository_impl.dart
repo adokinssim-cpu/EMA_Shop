@@ -1,5 +1,5 @@
 import '../../domain/repositories/favorites_repository.dart';
-import '../datasources/favorites_local_datasource.dart';
+import '../datasources/favorites_mock_datasource.dart';
 
 class FavoritesRepositoryImpl implements FavoritesRepository {
   final FavoritesLocalDataSource dataSource;

@@ -46,6 +46,7 @@ class CartScreen extends ConsumerWidget {
                   ),
                 ),
 
+                // LISTE DES ARTICLES
                 Expanded(
                   child: ListView.builder(
                     padding: const EdgeInsets.all(16),
@@ -75,6 +76,7 @@ class CartScreen extends ConsumerWidget {
                   ),
                 ),
 
+                // RÉSUMÉ
                 _CartSummary(
                   total: total,
                   itemCount: itemCount,
@@ -123,9 +125,9 @@ class CartScreen extends ConsumerWidget {
   }
 }
 
-// ═══════════════════════════════════════
+// ============================================================
 // ARTICLE DU PANIER
-// ═══════════════════════════════════════
+// ============================================================
 
 class _CartItemCard extends StatelessWidget {
   final CartItem item;
@@ -151,6 +153,7 @@ class _CartItemCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // IMAGE
             ClipRRect(
@@ -165,7 +168,7 @@ class _CartItemCard extends StatelessWidget {
                     width: 85,
                     height: 85,
                     alignment: Alignment.center,
-                    child: const Icon(Icons.image_not_supported),
+                    child: const Icon(Icons.image_not_supported_outlined),
                   );
                 },
               ),
@@ -195,8 +198,9 @@ class _CartItemCard extends StatelessWidget {
                     style: TextStyle(color: Colors.grey.shade400),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 10),
 
+                  // QUANTITÉ
                   Row(
                     children: [
                       _QuantityButton(
@@ -222,7 +226,9 @@ class _CartItemCard extends StatelessWidget {
               ),
             ),
 
-            // TOTAL ET SUPPRESSION
+            const SizedBox(width: 8),
+
+            // TOTAL + SUPPRESSION
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
@@ -231,6 +237,8 @@ class _CartItemCard extends StatelessWidget {
                   icon: const Icon(Icons.delete_outline),
                   tooltip: 'Supprimer',
                 ),
+
+                const SizedBox(height: 5),
 
                 Text(
                   _formatPrice(item.totalPrice),
@@ -245,9 +253,9 @@ class _CartItemCard extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════
+// ============================================================
 // BOUTON QUANTITÉ
-// ═══════════════════════════════════════
+// ============================================================
 
 class _QuantityButton extends StatelessWidget {
   final IconData icon;
@@ -269,9 +277,9 @@ class _QuantityButton extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════
+// ============================================================
 // RÉSUMÉ DU PANIER
-// ═══════════════════════════════════════
+// ============================================================
 
 class _CartSummary extends StatelessWidget {
   final double total;
@@ -298,6 +306,7 @@ class _CartSummary extends StatelessWidget {
         ),
         child: Column(
           children: [
+            // TOTAL
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -305,7 +314,6 @@ class _CartSummary extends StatelessWidget {
                   'Total',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-
                 Text(
                   _formatPrice(total),
                   style: const TextStyle(
@@ -318,6 +326,7 @@ class _CartSummary extends StatelessWidget {
 
             const SizedBox(height: 12),
 
+            // COMMANDE
             SizedBox(
               width: double.infinity,
               height: 52,
@@ -337,9 +346,9 @@ class _CartSummary extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════
+// ============================================================
 // PANIER VIDE
-// ═══════════════════════════════════════
+// ============================================================
 
 class _EmptyCart extends StatelessWidget {
   const _EmptyCart();
